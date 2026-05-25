@@ -458,8 +458,6 @@ function HomeScreen({ setScreen, savedPlaylists, profile }) {
         justifyContent: "space-between", alignItems: "center",
         marginBottom: 24, marginTop: 4 }}>
         <div>
-          <div style={{ fontFamily: font.display, fontSize: 32,
-            letterSpacing: 1, lineHeight: 1 }}>{greeting}</div>
           <div style={{ color: colors.textSub, fontSize: 13, marginTop: 2 }}>
             {today}
           </div>
