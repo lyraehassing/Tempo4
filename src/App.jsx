@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
 
 // ---- Design system ----
+// pink = pre-workout energy, purple = post-workout calm
 const colors = {
   bg: "#0a0a0f",
   card: "#13131a",
   cardBorder: "#1e1e2e",
-  accent: "#00e5cc",
-  accentDim: "#00a896",
+  pink: "#ff4d6d",
+  pinkDim: "#c4233d",
+  purple: "#8b5cf6",
+  purpleDim: "#6333cc",
+  accent: "#ff4d6d",     // home/saved/history default
+  accentDim: "#c4233d",
   muted: "#3a3a4a",
   text: "#f0f0f5",
   textSub: "#7a7a9a",
@@ -28,9 +33,13 @@ const gStyle = `
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 ${colors.accent}55; }
-    50%       { box-shadow: 0 0 0 14px ${colors.accent}00; }
+  @keyframes pulsePink {
+    0%, 100% { box-shadow: 0 0 0 0 ${colors.pink}55; }
+    50%       { box-shadow: 0 0 0 14px ${colors.pink}00; }
+  }
+  @keyframes pulsePurple {
+    0%, 100% { box-shadow: 0 0 0 0 ${colors.purple}55; }
+    50%       { box-shadow: 0 0 0 14px ${colors.purple}00; }
   }
   .fade-up { animation: fadeUp 0.5s ease both; }
   .delay-1 { animation-delay: 0.08s; }
@@ -194,11 +203,11 @@ function Phone({ children }) {
 
 function Nav({ screen, setScreen }) {
   const items = [
-    { id: "home",    icon: "⚡", label: "Home"    },
-    { id: "pre",     icon: "🎵", label: "Start"   },
-    { id: "post",    icon: "✅", label: "Log"     },
-    { id: "saved",   icon: "💾", label: "Saved"   },
-    { id: "history", icon: "📈", label: "History" },
+    { id: "home",    icon: "⚡", label: "Home",    color: colors.pink   },
+    { id: "pre",     icon: "🎵", label: "Start",   color: colors.pink   },
+    { id: "post",    icon: "✅", label: "Log",     color: colors.purple },
+    { id: "saved",   icon: "💾", label: "Saved",   color: colors.pink   },
+    { id: "history", icon: "📈", label: "History", color: colors.purple },
   ];
   return (
     <div style={{
@@ -211,7 +220,7 @@ function Nav({ screen, setScreen }) {
         <button key={it.id} onClick={() => setScreen(it.id)} style={{
           background: "none", border: "none", cursor: "pointer",
           display: "flex", flexDirection: "column", alignItems: "center",
-          gap: 2, color: screen === it.id ? colors.accent : colors.textSub,
+          gap: 2, color: screen === it.id ? it.color : colors.textSub,
           fontFamily: font.body, fontSize: 10, fontWeight: 500,
           transition: "color 0.2s",
         }}>
@@ -234,14 +243,15 @@ function Card({ children, style = {}, className = "" }) {
   );
 }
 
-function BigButton({ label, onClick, sub }) {
+function BigButton({ label, onClick, sub, color }) {
+  const c = color || colors.pink;
   return (
     <button onClick={onClick} style={{
       width: "100%", padding: "18px 24px",
-      background: colors.accent, color: "#0a0a0f",
+      background: c, color: "#0a0a0f",
       border: "none", borderRadius: 20, cursor: "pointer",
       fontFamily: font.display, fontSize: 26, letterSpacing: 1,
-      animation: "pulse 2.4s infinite",
+      animation: c === colors.purple ? "pulsePurple 2.4s infinite" : "pulsePink 2.4s infinite",
       display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
     }}>
       {label}
@@ -252,7 +262,8 @@ function BigButton({ label, onClick, sub }) {
 }
 
 // ---- MoodPicker (reused in Pre and Post) ----
-function MoodPicker({ mood, setMood, label = "How are you feeling?" }) {
+function MoodPicker({ mood, setMood, label = "How are you feeling?", color }) {
+  const c = color || colors.pink;
   return (
     <Card style={{ marginBottom: 16 }}>
       <div style={{ color: colors.textSub, fontSize: 11,
@@ -263,15 +274,15 @@ function MoodPicker({ mood, setMood, label = "How are you feeling?" }) {
         {moods.map((m, i) => (
           <button key={i} onClick={() => setMood(i)} style={{
             flex: 1,
-            background: mood === i ? colors.accent + "22" : "none",
-            border: mood === i ? `2px solid ${colors.accent}` : `2px solid ${colors.muted}`,
+            background: mood === i ? c + "22" : "none",
+            border: mood === i ? `2px solid ${c}` : `2px solid ${colors.muted}`,
             borderRadius: 14, padding: "10px 4px", cursor: "pointer",
             transition: "all 0.15s", display: "flex",
             flexDirection: "column", alignItems: "center", gap: 4,
           }}>
             <span style={{ fontSize: 24 }}>{m}</span>
             <span style={{ fontSize: 9, fontFamily: font.body,
-              color: mood === i ? colors.accent : colors.textSub }}>
+              color: mood === i ? c : colors.textSub }}>
               {moodLabels[i]}
             </span>
           </button>
@@ -284,6 +295,7 @@ function MoodPicker({ mood, setMood, label = "How are you feeling?" }) {
 // ---- PlaylistCard: shows songs + save + Spotify/Apple export ----
 function PlaylistCard({ playlist, activity, duration, phase, onSave, saved, onNext, nextLabel }) {
   const [justSaved, setJustSaved] = useState(false);
+  const c = phase === "post" ? colors.purple : colors.pink;
 
   function handleSave() {
     onSave(playlist, { activity, duration, phase });
@@ -295,15 +307,14 @@ function PlaylistCard({ playlist, activity, duration, phase, onSave, saved, onNe
 
   return (
     <Card className="fade-up" style={{
-      border: `1px solid ${colors.accent}66`,
-      background: "linear-gradient(135deg, #0a1a18, #13131a)",
+      border: `1px solid ${c}66`,
+      background: `linear-gradient(135deg, ${phase === "post" ? "#0d0a1a" : "#1a0a0f"}, #13131a)`,
       marginBottom: 16,
     }}>
-      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between",
         alignItems: "flex-start", marginBottom: 4 }}>
         <div>
-          <div style={{ color: colors.accent, fontSize: 11,
+          <div style={{ color: c, fontSize: 11,
             textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
             ✨ AI Playlist · {songCount} songs · ~{estMins} min
           </div>
@@ -311,9 +322,8 @@ function PlaylistCard({ playlist, activity, duration, phase, onSave, saved, onNe
             {playlist.title}
           </div>
         </div>
-        {/* Save button */}
         <button onClick={handleSave} disabled={saved || justSaved} style={{
-          background: saved || justSaved ? colors.muted : colors.accent,
+          background: saved || justSaved ? colors.muted : c,
           color: saved || justSaved ? colors.textSub : "#0a0a0f",
           border: "none", borderRadius: 10, padding: "6px 12px",
           fontFamily: font.body, fontSize: 11, fontWeight: 600,
@@ -327,24 +337,21 @@ function PlaylistCard({ playlist, activity, duration, phase, onSave, saved, onNe
         {playlist.vibe}
       </div>
 
-      {/* Song list — each song links to Spotify search */}
       {playlist.songs.map((s, i) => (
         <a key={i} href={spotifySearchUrl(s)} target="_blank" rel="noreferrer"
           style={{ textDecoration: "none", display: "flex", alignItems: "center",
             gap: 10, padding: "9px 0", borderBottom: `1px solid ${colors.muted}`,
             color: "inherit" }}>
-          <span style={{ color: colors.accent, fontFamily: font.display,
+          <span style={{ color: c, fontFamily: font.display,
             fontSize: 14, width: 18 }}>{i + 1}</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 500 }}>{s.title}</div>
             <div style={{ fontSize: 11, color: colors.textSub }}>{s.artist}</div>
           </div>
-          {/* Spotify icon — tap to search this song */}
           <span style={{ fontSize: 14, color: colors.spotify }}>♫</span>
         </a>
       ))}
 
-      {/* Export buttons */}
       <div style={{ fontSize: 11, color: colors.textSub,
         textAlign: "center", margin: "12px 0 8px" }}>
         Tap any song to search on Spotify, or open the full playlist:
@@ -371,7 +378,7 @@ function PlaylistCard({ playlist, activity, duration, phase, onSave, saved, onNe
       {onNext && (
         <button onClick={onNext} style={{
           width: "100%", marginTop: 10, padding: "14px",
-          background: colors.accent, color: "#0a0a0f",
+          background: c, color: "#0a0a0f",
           border: "none", borderRadius: 14, cursor: "pointer",
           fontFamily: font.display, fontSize: 20,
         }}>{nextLabel}</button>
@@ -410,8 +417,8 @@ function HomeScreen({ setScreen, savedPlaylists }) {
 
       {/* Streak */}
       <Card className="fade-up delay-1" style={{ marginBottom: 16,
-        background: "linear-gradient(135deg, #0a1a18, #13131a)",
-        border: `1px solid ${colors.accent}44` }}>
+        background: "linear-gradient(135deg, #1a0a0f, #13131a)",
+        border: `1px solid ${colors.pink}44` }}>
         <div style={{ display: "flex", justifyContent: "space-between",
           alignItems: "center", marginBottom: 14 }}>
           <div>
@@ -419,7 +426,7 @@ function HomeScreen({ setScreen, savedPlaylists }) {
               fontWeight: 500, textTransform: "uppercase", letterSpacing: 1 }}>
               Current Streak</div>
             <div style={{ fontFamily: font.display, fontSize: 48,
-              color: colors.accent, lineHeight: 1.1 }}>
+              color: colors.pink, lineHeight: 1.1 }}>
               {streak} <span style={{ fontSize: 24 }}>DAYS 🔥</span>
             </div>
           </div>
@@ -434,7 +441,7 @@ function HomeScreen({ setScreen, savedPlaylists }) {
             <div key={i} style={{ flex: 1, textAlign: "center" }}>
               <div style={{
                 width: "100%", aspectRatio: "1", borderRadius: "50%",
-                background: done[i] ? colors.accent : colors.muted,
+                background: done[i] ? colors.pink : colors.muted,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 10, color: done[i] ? "#0a0a0f" : colors.textSub,
                 fontWeight: 700,
@@ -468,7 +475,7 @@ function HomeScreen({ setScreen, savedPlaylists }) {
                 {lastSaved.playlist.songs.length} songs · {lastSaved.activity} · {lastSaved.date}
               </div>
             </div>
-            <span style={{ color: colors.accent }}>→</span>
+            <span style={{ color: colors.pink }}>→</span>
           </div>
         </Card>
       )}
@@ -486,7 +493,7 @@ function HomeScreen({ setScreen, savedPlaylists }) {
           ].map((s, i) => (
             <div key={i} style={{ textAlign: "center", flex: 1 }}>
               <div style={{ fontFamily: font.display, fontSize: 28,
-                color: colors.accent }}>{s.val}</div>
+                color: colors.pink }}>{s.val}</div>
               <div style={{ fontSize: 11, color: colors.textSub }}>{s.label}</div>
               <div style={{ fontSize: 10, color: colors.muted }}>{s.unit}</div>
             </div>
@@ -545,7 +552,7 @@ function PreScreen({ setScreen, onSave, savedPlaylists }) {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {activities.map((a, i) => (
             <button key={i} onClick={() => setActivity(i)} style={{
-              background: activity === i ? colors.accent : colors.muted,
+              background: activity === i ? colors.pink : colors.muted,
               color: activity === i ? "#0a0a0f" : colors.text,
               border: "none", borderRadius: 12, padding: "10px 8px",
               fontFamily: font.body, fontSize: 13, fontWeight: 500,
@@ -563,14 +570,14 @@ function PreScreen({ setScreen, onSave, savedPlaylists }) {
             textTransform: "uppercase", letterSpacing: 1 }}>Workout Length</div>
           <div>
             <span style={{ fontFamily: font.display, fontSize: 28,
-              color: colors.accent }}>{duration} min</span>
+              color: colors.pink }}>{duration} min</span>
             <span style={{ color: colors.textSub, fontSize: 12,
               marginLeft: 6 }}>~{Math.round(duration / AVG_SONG_MINUTES)} songs</span>
           </div>
         </div>
         <input type="range" min={10} max={120} step={5} value={duration}
           onChange={e => setDuration(+e.target.value)}
-          style={{ width: "100%", accentColor: colors.accent }} />
+          style={{ width: "100%", accentColor: colors.pink }} />
         <div style={{ display: "flex", justifyContent: "space-between",
           fontSize: 11, color: colors.textSub, marginTop: 4 }}>
           <span>10 min</span><span>2 hours</span>
@@ -579,7 +586,7 @@ function PreScreen({ setScreen, onSave, savedPlaylists }) {
 
       {/* Mood */}
       <div className="fade-up delay-3">
-        <MoodPicker mood={mood} setMood={setMood} label="How are you feeling?" />
+        <MoodPicker mood={mood} setMood={setMood} label="How are you feeling?" color={colors.pink} />
       </div>
 
       {error && <div style={{ color: colors.warn, fontSize: 13,
@@ -589,7 +596,7 @@ function PreScreen({ setScreen, onSave, savedPlaylists }) {
         <div className="fade-up delay-4">
           <button onClick={handleGenerate} disabled={!canGenerate || loading} style={{
             width: "100%", padding: "18px",
-            background: canGenerate ? colors.accent : colors.muted,
+            background: canGenerate ? colors.pink : colors.muted,
             color: canGenerate ? "#0a0a0f" : colors.textSub,
             border: "none", borderRadius: 20,
             cursor: canGenerate ? "pointer" : "not-allowed",
@@ -656,7 +663,7 @@ function PostScreen({ setScreen, onSave, savedPlaylists }) {
   return (
     <div style={{ padding: "8px 20px 0" }}>
       <div className="fade-up" style={{ marginBottom: 20 }}>
-        <div style={{ color: colors.accent, fontSize: 12,
+        <div style={{ color: colors.purple, fontSize: 12,
           textTransform: "uppercase", letterSpacing: 1 }}>Nice work! 💪</div>
         <div style={{ fontFamily: font.display, fontSize: 36, lineHeight: 1.1 }}>
           POST-WORKOUT<br/>LOG
@@ -670,11 +677,11 @@ function PostScreen({ setScreen, onSave, savedPlaylists }) {
           <div style={{ color: colors.textSub, fontSize: 11,
             textTransform: "uppercase", letterSpacing: 1 }}>How long?</div>
           <div style={{ fontFamily: font.display, fontSize: 28,
-            color: colors.accent }}>{duration} min</div>
+            color: colors.purple }}>{duration} min</div>
         </div>
         <input type="range" min={5} max={120} value={duration}
           onChange={e => setDuration(+e.target.value)}
-          style={{ width: "100%", accentColor: colors.accent }} />
+          style={{ width: "100%", accentColor: colors.purple }} />
         <div style={{ display: "flex", justifyContent: "space-between",
           fontSize: 11, color: colors.textSub, marginTop: 4 }}>
           <span>5 min</span><span>2 hours</span>
@@ -688,11 +695,11 @@ function PostScreen({ setScreen, onSave, savedPlaylists }) {
           <div style={{ color: colors.textSub, fontSize: 11,
             textTransform: "uppercase", letterSpacing: 1 }}>Intensity</div>
           <div style={{ fontFamily: font.display, fontSize: 28,
-            color: colors.accent }}>{intensity}/10</div>
+            color: colors.purple }}>{intensity}/10</div>
         </div>
         <input type="range" min={1} max={10} value={intensity}
           onChange={e => setIntensity(+e.target.value)}
-          style={{ width: "100%", accentColor: colors.accent }} />
+          style={{ width: "100%", accentColor: colors.purple }} />
         <div style={{ display: "flex", justifyContent: "space-between",
           fontSize: 11, color: colors.textSub, marginTop: 4 }}>
           <span>Easy 😌</span><span>Beast 💀</span>
@@ -701,12 +708,12 @@ function PostScreen({ setScreen, onSave, savedPlaylists }) {
 
       {/* Mood */}
       <div className="fade-up delay-3">
-        <MoodPicker mood={mood} setMood={setMood} label="How do you feel NOW?" />
+        <MoodPicker mood={mood} setMood={setMood} label="How do you feel NOW?" color={colors.purple} />
       </div>
 
       {mood !== null && !playlist && (
         <Card className="fade-up" style={{ marginBottom: 16,
-          border: `1px solid ${colors.accent}55`,
+          border: `1px solid ${colors.purple}55`,
           background: "linear-gradient(135deg,#0a1a18,#13131a)" }}>
           <div style={{ display: "flex", justifyContent: "space-between",
             alignItems: "center", marginBottom: 16 }}>
@@ -714,18 +721,18 @@ function PostScreen({ setScreen, onSave, savedPlaylists }) {
               <div style={{ color: colors.textSub, fontSize: 11,
                 textTransform: "uppercase", letterSpacing: 1 }}>Mood Shift</div>
               <div style={{ fontFamily: font.display, fontSize: 32,
-                color: colors.accent }}>😴 → {moods[mood]}</div>
+                color: colors.purple }}>😴 → {moods[mood]}</div>
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ color: colors.textSub, fontSize: 11 }}>lift</div>
               <div style={{ fontFamily: font.display, fontSize: 32,
-                color: colors.accent }}>+{mood} pts</div>
+                color: colors.purple }}>+{mood} pts</div>
             </div>
           </div>
           {error && <div style={{ color: colors.warn, fontSize: 13,
             marginBottom: 10 }}>{error}</div>}
           <button onClick={handleGenerate} disabled={loading} style={{
-            width: "100%", padding: "16px", background: colors.accent,
+            width: "100%", padding: "16px", background: colors.purple,
             color: "#0a0a0f", border: "none", borderRadius: 14,
             cursor: loading ? "not-allowed" : "pointer",
             fontFamily: font.display, fontSize: 22, letterSpacing: 1,
@@ -805,7 +812,7 @@ function SavedScreen({ savedPlaylists, onDelete }) {
 
         return (
           <Card key={i} className="fade-up" style={{ marginBottom: 12,
-            border: isOpen ? `1px solid ${colors.accent}55` : `1px solid ${colors.cardBorder}`,
+            border: isOpen ? `1px solid ${colors.pink}55` : `1px solid ${colors.cardBorder}`,
             transition: "border 0.2s" }}>
 
             {/* Collapsed header — tap to expand */}
@@ -823,7 +830,7 @@ function SavedScreen({ savedPlaylists, onDelete }) {
                   {item.activity} · {item.playlist.songs.length} songs · ~{estMins} min · {item.date}
                 </div>
               </div>
-              <span style={{ color: colors.accent, fontSize: 18,
+              <span style={{ color: colors.pink, fontSize: 18,
                 transition: "transform 0.2s",
                 transform: isOpen ? "rotate(90deg)" : "none" }}>›</span>
             </div>
@@ -840,7 +847,7 @@ function SavedScreen({ savedPlaylists, onDelete }) {
                     style={{ textDecoration: "none", color: "inherit",
                       display: "flex", alignItems: "center", gap: 10,
                       padding: "8px 0", borderBottom: `1px solid ${colors.muted}` }}>
-                    <span style={{ color: colors.accent,
+                    <span style={{ color: colors.pink,
                       fontFamily: font.display, fontSize: 13,
                       width: 18 }}>{j + 1}</span>
                     <div style={{ flex: 1 }}>
@@ -921,14 +928,14 @@ function HistoryScreen() {
                 <div style={{ width: "40%", height: `${(d.pre / 4) * 80}px`,
                   background: colors.muted, borderRadius: "4px 4px 0 0" }} />
                 <div style={{ width: "40%", height: `${(d.post / 4) * 80}px`,
-                  background: colors.accent, borderRadius: "4px 4px 0 0" }} />
+                  background: colors.purple, borderRadius: "4px 4px 0 0" }} />
               </div>
               <div style={{ fontSize: 10, color: colors.textSub }}>{d.day}</div>
             </div>
           ))}
         </div>
         <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
-          {[["Before", colors.muted], ["After", colors.accent]].map(([l, c]) => (
+          {[["Before", colors.muted], ["After", colors.purple]].map(([l, c]) => (
             <div key={l} style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ width: 10, height: 10, borderRadius: 2, background: c }} />
               <span style={{ fontSize: 11, color: colors.textSub }}>{l}</span>
@@ -956,20 +963,20 @@ function HistoryScreen() {
               </div>
             </div>
             <div style={{ fontFamily: font.display, fontSize: 18,
-              color: colors.accent }}>+{d.post - d.pre}</div>
+              color: colors.purple }}>+{d.post - d.pre}</div>
           </div>
         ))}
       </Card>
 
       <Card className="fade-up delay-3" style={{
-        border: `1px solid ${colors.accent}44`,
+        border: `1px solid ${colors.purple}44`,
         background: "linear-gradient(135deg,#0a1a18,#13131a)" }}>
         <div style={{ fontSize: 24, marginBottom: 8 }}>🧠</div>
         <div style={{ fontFamily: font.display, fontSize: 20, marginBottom: 6 }}>
           WORKOUT = MOOD BOOST</div>
         <div style={{ color: colors.textSub, fontSize: 13, lineHeight: 1.6 }}>
           Your mood improves by an average of{" "}
-          <span style={{ color: colors.accent, fontWeight: 600 }}>+2.3 pts</span>{" "}
+          <span style={{ color: colors.purple, fontWeight: 600 }}>+2.3 pts</span>{" "}
           after every session this week. Your best days start with a workout.
         </div>
       </Card>
