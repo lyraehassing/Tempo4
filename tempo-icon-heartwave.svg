@@ -1,0 +1,30 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" width="512" height="512">
+  <defs>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00e5cc" stop-opacity="0.3"/>
+      <stop offset="40%" stop-color="#00e5cc" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#00e5cc" stop-opacity="1"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00e5cc" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#00e5cc" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="#0a0a0f"/>
+  <!-- Glow -->
+  <circle cx="256" cy="256" r="220" fill="url(#glow)"/>
+  <!-- Left side: flat heartbeat line -->
+  <polyline
+    points="34,256 120,256 154,163 188,350 222,188 240,256"
+    fill="none" stroke="url(#g3)" stroke-width="18"
+    stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right side: waveform bars growing then fading -->
+  <rect x="242" y="188" width="26" height="136" rx="13" fill="#00e5cc"/>
+  <rect x="278" y="144" width="26" height="224" rx="13" fill="#00e5cc"/>
+  <rect x="314" y="188" width="26" height="136" rx="13" fill="#00e5cc"/>
+  <rect x="350" y="213" width="26" height="86"  rx="13" fill="#00e5cc" opacity="0.7"/>
+  <rect x="386" y="230" width="26" height="52"  rx="13" fill="#00e5cc" opacity="0.45"/>
+  <rect x="422" y="241" width="26" height="30"  rx="13" fill="#00e5cc" opacity="0.25"/>
+  <rect x="458" y="248" width="26" height="16"  rx="8"  fill="#00e5cc" opacity="0.12"/>
+</svg>
