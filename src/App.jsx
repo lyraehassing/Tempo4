@@ -1,34 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-// ---- Design system ----
-// pink = pre-workout energy, purple = post-workout calm
+// ---- Design system — Rose theme ----
 const colors = {
-  bg: "#0a0a0f",
-  card: "#13131a",
-  cardBorder: "#1e1e2e",
-  pink: "#ff4d6d",
-  pinkDim: "#c4233d",
-  purple: "#8b5cf6",
-  purpleDim: "#6333cc",
-  accent: "#ff4d6d",     // home/saved/history default
-  accentDim: "#c4233d",
-  muted: "#3a3a4a",
-  text: "#f0f0f5",
-  textSub: "#7a7a9a",
-  warn: "#f5a623",
-  spotify: "#1DB954",
-  apple: "#fc3c44",
+  pink:       "#f48fb1",
+  pinkDim:    "#f48fb1cc",
+  purple:     "#ce93d8",
+  purpleDim:  "#ce93d8cc",
+  accent:     "#f48fb1",
+  accentDim:  "#f48fb1cc",
+  bg:         "#0f0508",
+  card:       "#1a0a12",
+  cardBorder: "#2e1020",
+  text:       "#fff0f5",
+  textSub:    "#a07080",
+  muted:      "#3a1828",
+  warn:       "#f5a623",
+  spotify:    "#1DB954",
+  apple:      "#fc3c44",
 };
 
 const font = {
   display: "'Bebas Neue', sans-serif",
-  body: "'DM Sans', sans-serif",
+  body:    "'DM Sans', sans-serif",
 };
 
 const gStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: ${colors.bg}; font-family: ${font.body}; color: ${colors.text}; }
+  #root { padding-top: env(safe-area-inset-top); }
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -173,6 +173,10 @@ function spotifyPlaylistUrl(playlist) {
 function appleMusicUrl(playlist) {
   return `https://music.apple.com/search?term=${encodeURIComponent(playlist.title)}`;
 }
+function youtubeMusicUrl(playlist) {
+  const q = encodeURIComponent(`${playlist.title} ${playlist.songs[0]?.artist || ""}`);
+  return `https://music.youtube.com/search?q=${q}`;
+}
 
 // ==============================
 // SHARED COMPONENTS
@@ -206,15 +210,15 @@ function Nav({ screen, setScreen }) {
     { id: "home",    icon: "⚡", label: "Home",    color: colors.pink   },
     { id: "pre",     icon: "🎵", label: "Start",   color: colors.pink   },
     { id: "post",    icon: "✅", label: "Log",     color: colors.purple },
-    { id: "saved",   icon: "💾", label: "Saved",   color: colors.pink   },
+    { id: "saved",   icon: "♥", label: "Saved",   color: colors.pink   },
     { id: "history", icon: "📈", label: "History", color: colors.purple },
   ];
   return (
     <div style={{
-      position: "absolute", bottom: 0, left: 0, right: 0, height: 80,
+      position: "fixed", bottom: 0, left: 0, right: 0, height: 80,
       background: colors.card, borderTop: `1px solid ${colors.cardBorder}`,
       display: "flex", alignItems: "center", justifyContent: "space-around",
-      padding: "0 4px 8px",
+      padding: "0 4px 8px", zIndex: 100,
     }}>
       {items.map(it => (
         <button key={it.id} onClick={() => setScreen(it.id)} style={{
@@ -330,7 +334,10 @@ function PlaylistCard({ playlist, activity, duration, phase, onSave, saved, onNe
           cursor: saved || justSaved ? "default" : "pointer",
           transition: "all 0.2s", whiteSpace: "nowrap", marginLeft: 8,
         }}>
-          {saved || justSaved ? "✓ Saved" : "💾 Save"}
+          {saved || justSaved
+            ? "✓ Saved"
+            : <><span style={{ color: colors.pink, fontSize: 13 }}>♥</span> Save</>
+          }
         </button>
       </div>
       <div style={{ color: colors.textSub, fontSize: 13, marginBottom: 14 }}>
@@ -359,20 +366,28 @@ function PlaylistCard({ playlist, activity, duration, phase, onSave, saved, onNe
       <div style={{ display: "flex", gap: 8 }}>
         <a href={spotifyPlaylistUrl(playlist)} target="_blank" rel="noreferrer"
           style={{
-            flex: 1, padding: "12px 8px", borderRadius: 12,
+            flex: 1, padding: "12px 4px", borderRadius: 12,
             background: colors.spotify, color: "#fff", textDecoration: "none",
             textAlign: "center", fontFamily: font.body,
-            fontSize: 12, fontWeight: 600,
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
-          }}>🎵 Search on Spotify</a>
+            fontSize: 11, fontWeight: 600,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
+          }}>🎵 Spotify</a>
         <a href={appleMusicUrl(playlist)} target="_blank" rel="noreferrer"
           style={{
-            flex: 1, padding: "12px 8px", borderRadius: 12,
+            flex: 1, padding: "12px 4px", borderRadius: 12,
             background: colors.apple, color: "#fff", textDecoration: "none",
             textAlign: "center", fontFamily: font.body,
-            fontSize: 12, fontWeight: 600,
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
-          }}>🍎 Apple Music</a>
+            fontSize: 11, fontWeight: 600,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
+          }}>🍎 Apple</a>
+        <a href={youtubeMusicUrl(playlist)} target="_blank" rel="noreferrer"
+          style={{
+            flex: 1, padding: "12px 4px", borderRadius: 12,
+            background: "#ff0000", color: "#fff", textDecoration: "none",
+            textAlign: "center", fontFamily: font.body,
+            fontSize: 11, fontWeight: 600,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
+          }}>▶ YT Music</a>
       </div>
 
       {onNext && (
@@ -786,7 +801,7 @@ function SavedScreen({ savedPlaylists, onDelete }) {
           <div style={{ fontFamily: font.display, fontSize: 22,
             marginBottom: 8 }}>NO PLAYLISTS YET</div>
           <div style={{ color: colors.textSub, fontSize: 13 }}>
-            Generate a playlist in the Start or Log screen and tap 💾 Save to add it here.
+            Generate a playlist in the Start or Log screen and tap ♥ Save to add it here.
           </div>
         </Card>
       </div>
@@ -861,25 +876,32 @@ function SavedScreen({ savedPlaylists, onDelete }) {
                 <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
                   <a href={spotifyPlaylistUrl(item.playlist)}
                     target="_blank" rel="noreferrer" style={{
-                      flex: 1, padding: "10px 8px", borderRadius: 12,
+                      flex: 1, padding: "10px 4px", borderRadius: 12,
                       background: colors.spotify, color: "#fff",
                       textDecoration: "none", textAlign: "center",
-                      fontFamily: font.body, fontSize: 12, fontWeight: 600,
+                      fontFamily: font.body, fontSize: 11, fontWeight: 600,
                     }}>🎵 Spotify</a>
                   <a href={appleMusicUrl(item.playlist)}
                     target="_blank" rel="noreferrer" style={{
-                      flex: 1, padding: "10px 8px", borderRadius: 12,
+                      flex: 1, padding: "10px 4px", borderRadius: 12,
                       background: colors.apple, color: "#fff",
                       textDecoration: "none", textAlign: "center",
-                      fontFamily: font.body, fontSize: 12, fontWeight: 600,
+                      fontFamily: font.body, fontSize: 11, fontWeight: 600,
                     }}>🍎 Apple</a>
+                  <a href={youtubeMusicUrl(item.playlist)}
+                    target="_blank" rel="noreferrer" style={{
+                      flex: 1, padding: "10px 4px", borderRadius: 12,
+                      background: "#ff0000", color: "#fff",
+                      textDecoration: "none", textAlign: "center",
+                      fontFamily: font.body, fontSize: 11, fontWeight: 600,
+                    }}>▶ YT</a>
                   <button onClick={() => { onDelete(savedPlaylists.length - 1 - i); setExpanded(null); }}
                     style={{
-                      padding: "10px 14px", borderRadius: 12,
+                      padding: "10px 12px", borderRadius: 12,
                       background: colors.muted, color: colors.textSub,
                       border: "none", cursor: "pointer",
-                      fontFamily: font.body, fontSize: 12,
-                    }}>🗑 Delete</button>
+                      fontFamily: font.body, fontSize: 11,
+                    }}>🗑</button>
                 </div>
               </div>
             )}
@@ -985,15 +1007,12 @@ function HistoryScreen() {
 }
 
 // ==============================
-// ROOT APP — manages saved playlists state
+// ROOT APP
 // ==============================
 export default function App() {
   const [screen, setScreen] = useState("home");
-
-  // savedPlaylists lives here so ALL screens can read and write it
   const [savedPlaylists, setSavedPlaylists] = useState([]);
 
-  // Save a playlist — called from PlaylistCard's 💾 button
   function handleSave(playlist, meta) {
     const entry = {
       playlist,
@@ -1005,7 +1024,6 @@ export default function App() {
     setSavedPlaylists(prev => [...prev, entry]);
   }
 
-  // Delete a saved playlist by index
   function handleDelete(index) {
     setSavedPlaylists(prev => prev.filter((_, i) => i !== index));
   }
@@ -1013,27 +1031,16 @@ export default function App() {
   return (
     <>
       <style>{gStyle}</style>
-      <div style={{ minHeight: "100vh", background: "#050508",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 24, flexDirection: "column", gap: 24 }}>
-        <div style={{ color: "#ffffff33", fontSize: 12,
-          fontFamily: "DM Sans, sans-serif", letterSpacing: 1 }}>
-          TEMPO — INTERACTIVE MOCKUP
+      <div style={{ minHeight: "100vh", background: colors.bg,
+        display: "flex", flexDirection: "column", position: "relative" }}>
+        <div style={{ flex: 1, overflowY: "auto", paddingBottom: 90 }}>
+          {screen === "home"    && <HomeScreen    setScreen={setScreen} savedPlaylists={savedPlaylists} />}
+          {screen === "pre"     && <PreScreen     setScreen={setScreen} onSave={handleSave} savedPlaylists={savedPlaylists} />}
+          {screen === "post"    && <PostScreen    setScreen={setScreen} onSave={handleSave} savedPlaylists={savedPlaylists} />}
+          {screen === "saved"   && <SavedScreen   savedPlaylists={savedPlaylists} onDelete={handleDelete} />}
+          {screen === "history" && <HistoryScreen />}
         </div>
-        <div style={{ position: "relative" }}>
-          <Phone>
-            {screen === "home"    && <HomeScreen    setScreen={setScreen} savedPlaylists={savedPlaylists} />}
-            {screen === "pre"     && <PreScreen     setScreen={setScreen} onSave={handleSave} savedPlaylists={savedPlaylists} />}
-            {screen === "post"    && <PostScreen    setScreen={setScreen} onSave={handleSave} savedPlaylists={savedPlaylists} />}
-            {screen === "saved"   && <SavedScreen   savedPlaylists={savedPlaylists} onDelete={handleDelete} />}
-            {screen === "history" && <HistoryScreen />}
-          </Phone>
-          <Nav screen={screen} setScreen={setScreen} />
-        </div>
-        <div style={{ color: "#ffffff22", fontSize: 11,
-          fontFamily: "DM Sans, sans-serif", textAlign: "center" }}>
-          Tap the nav bar · Generate a playlist · Hit 💾 to save it
-        </div>
+        <Nav screen={screen} setScreen={setScreen} />
       </div>
     </>
   );
