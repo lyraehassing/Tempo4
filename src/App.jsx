@@ -396,7 +396,7 @@ function HomeScreen({ setScreen, savedPlaylists }) {
         marginBottom: 24, marginTop: 4 }}>
         <div>
           <div style={{ fontFamily: font.display, fontSize: 32,
-            letterSpacing: 1, lineHeight: 1 }}>PULSEPLAY</div>
+            letterSpacing: 1, lineHeight: 1 }}>TEMPO</div>
           <div style={{ color: colors.textSub, fontSize: 13, marginTop: 2 }}>
             Sunday, May 24
           </div>
@@ -1011,7 +1011,7 @@ export default function App() {
         padding: 24, flexDirection: "column", gap: 24 }}>
         <div style={{ color: "#ffffff33", fontSize: 12,
           fontFamily: "DM Sans, sans-serif", letterSpacing: 1 }}>
-          PULSEPLAY — INTERACTIVE MOCKUP
+          TEMPO — INTERACTIVE MOCKUP
         </div>
         <div style={{ position: "relative" }}>
           <Phone>
